@@ -7,6 +7,8 @@
  * @license https://github.com/Cotonti/Cotonti/blob/master/License.txt
  */
 
+use cot\dictionaries\CotontiDictionary;
+
 defined('COT_CODE') or die('Wrong URL.');
 
 // Requirements
@@ -200,7 +202,9 @@ function cot_get_extensionparams($code, $is_module = false)
         }
     }
 
-	$langfile = cot_langfile($code, $is_module ? COT_EXT_TYPE_MODULE : COT_EXT_TYPE_PLUGIN);
+	$langfile = cot_langfile(
+        $code, $is_module ? CotontiDictionary::EXTENSION_TYPE_MODULE : CotontiDictionary::EXTENSION_TYPE_PLUGIN
+    );
 	if (file_exists($langfile)) {
         $L['info_name'] = $L['info_desc'] = $L['info_notes'] = '';
 		include $langfile;

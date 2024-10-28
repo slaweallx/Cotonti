@@ -6,6 +6,7 @@ const sourcemaps = require('gulp-sourcemaps');
 
 const sourceFiles = [
     'src/_header.js',
+    'src/CotontiPeriodicalRequest.js',
     'src/CotontiApplication.js',
     'src/base.js',
 ];

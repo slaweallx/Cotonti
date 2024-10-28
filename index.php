@@ -7,6 +7,8 @@
  * @license https://github.com/Cotonti/Cotonti/blob/master/License.txt
  */
 
+use cot\router\Router;
+
 if (php_sapi_name() == 'cli-server') {
 	// Embedded PHP webserver routing
 	$tmp = explode('?', $_SERVER['REQUEST_URI']);
@@ -82,6 +84,11 @@ require_once $cfg['system_dir'] . '/functions.php';
 
 // Bootstrap
 require_once $cfg['system_dir'] . '/common.php';
+
+$router = new Router();
+echo '<pre>';
+var_dump($router->route());
+echo '</pre>';
 
 $ext = isset($_GET['e']) ? cot_import('e', 'G', 'ALP') : false;
 $ajax = cot_import('r', 'G', 'ALP');

@@ -7,6 +7,8 @@
  * @license https://github.com/Cotonti/Cotonti/blob/master/License.txt
  */
 
+use cot\dictionaries\CotontiDictionary;
+
 (defined('COT_CODE') && defined('COT_ADMIN')) or die('Wrong URL.');
 
 /**
@@ -553,7 +555,7 @@ switch($a) {
             ['code' => $code]
         )->fetchColumn();
 
-        $params = cot_get_extensionparams($code, $type == COT_EXT_TYPE_MODULE);
+        $params = cot_get_extensionparams($code, $type === CotontiDictionary::EXTENSION_TYPE_MODULE);
 
         $extensionCategoryTitle = '';
         if (!empty($info['Category'])) {
@@ -563,7 +565,9 @@ switch($a) {
 		// Universal tags
 		$t->assign([
 			'ADMIN_EXTENSIONS_NAME' => htmlspecialchars($params['name']),
-			'ADMIN_EXTENSIONS_TYPE' => $type == COT_EXT_TYPE_MODULE ? Cot::$L['Module'] : Cot::$L['Plugin'],
+			'ADMIN_EXTENSIONS_TYPE' => $type === CotontiDictionary::EXTENSION_TYPE_MODULE
+                ? Cot::$L['Module']
+                : Cot::$L['Plugin'],
 			'ADMIN_EXTENSIONS_CODE' => $code,
             'ADMIN_EXTENSIONS_ICON' => $params['icon'],
 			'ADMIN_EXTENSIONS_DESCRIPTION' => $params['desc'],
@@ -834,7 +838,11 @@ switch($a) {
 
             $i = 1;
 			foreach ($extensions as $code => $info) {
-				if ($sort === 'cat' && $type === COT_EXT_TYPE_PLUGIN && $prev_cat !== $info['Category']) {
+				if (
+                    $sort === 'cat'
+                    && $type === CotontiDictionary::EXTENSION_TYPE_PLUGIN
+                    && $prev_cat !== $info['Category']
+                ) {
 					// Render category heading
 					$t->assign(
                         'ADMIN_EXTENSIONS_CAT_TITLE',
@@ -886,7 +894,7 @@ switch($a) {
 
 					$hasStructure = in_array($code, $extensionsWithStructure, true);
 
-					if ($type == COT_EXT_TYPE_MODULE) {
+					if ($type === CotontiDictionary::EXTENSION_TYPE_MODULE) {
 						$arg = 'mod';
 					} else {
 						$arg = 'pl';
@@ -894,7 +902,7 @@ switch($a) {
 
 					$installed_ver = isset($installed_vers[$code]) ? $installed_vers[$code] : '';
 
-                    $params = cot_get_extensionparams($code, $type == COT_EXT_TYPE_MODULE);
+                    $params = cot_get_extensionparams($code, $type === CotontiDictionary::EXTENSION_TYPE_MODULE);
 
 					Cot::$L['info_name'] = Cot::$L['info_desc'] = Cot::$L['info_notes'] = '';
 					if (file_exists(cot_langfile($code, $type))) {
@@ -904,7 +912,9 @@ switch($a) {
 					$t->assign([
 						'ADMIN_EXTENSIONS_DETAILS_URL' => cot_url('admin', "m=extensions&a=details&$arg=$code"),
 						'ADMIN_EXTENSIONS_NAME' => htmlspecialchars($params['name']),
-						'ADMIN_EXTENSIONS_TYPE' => $type == COT_EXT_TYPE_MODULE ? Cot::$L['Module'] : Cot::$L['Plugin'],
+						'ADMIN_EXTENSIONS_TYPE' => $type === CotontiDictionary::EXTENSION_TYPE_MODULE
+                            ? Cot::$L['Module']
+                            : Cot::$L['Plugin'],
 						'ADMIN_EXTENSIONS_CODE_X' => $code,
 						'ADMIN_EXTENSIONS_NOTES' => $params['notes'],
 						'ADMIN_EXTENSIONS_DESCRIPTION' => $params['desc'],
@@ -916,12 +926,12 @@ switch($a) {
 						'ADMIN_EXTENSIONS_VERSION' => $info['Version'],
 						'ADMIN_EXTENSIONS_VERSION_INSTALLED' => $installed_ver,
 						'ADMIN_EXTENSIONS_VERSION_COMPARE' => version_compare($info['Version'], $installed_ver),
-						'ADMIN_EXTENSIONS_RIGHTS_URL' => $type == COT_EXT_TYPE_MODULE ?
-                            cot_url('admin', "m=rightsbyitem&ic=$code&io=a") :
-                            cot_url('admin', "m=rightsbyitem&ic=$type&io=$code"),
-						'ADMIN_EXTENSIONS_JUMPTO_URL_TOOLS' => $type == COT_EXT_TYPE_PLUGIN ?
-                            cot_url('admin', "m=other&p=$code") :
-                            cot_url('admin', "m=$code"),
+						'ADMIN_EXTENSIONS_RIGHTS_URL' => $type === CotontiDictionary::EXTENSION_TYPE_MODULE
+                            ? cot_url('admin', "m=rightsbyitem&ic=$code&io=a")
+                            : cot_url('admin', "m=rightsbyitem&ic=$type&io=$code"),
+						'ADMIN_EXTENSIONS_JUMPTO_URL_TOOLS' => $type === CotontiDictionary::EXTENSION_TYPE_PLUGIN
+                            ? cot_url('admin', "m=other&p=$code")
+                            : cot_url('admin', "m=$code"),
 						'ADMIN_EXTENSIONS_JUMPTO_URL' => isset($standalone[$code]) ? $standalone[$code] : '',
 						'ADMIN_EXTENSIONS_JUMPTO_URL_STRUCT' => $hasStructure
                             ? cot_url('admin', ['m' => 'structure', 'n' => $code])

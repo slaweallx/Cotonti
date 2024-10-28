@@ -4,6 +4,12 @@
 class CotontiApplication
 {
     /**
+     * @type {CotontiPeriodicalRequest}
+     * @private
+     */
+    #periodicalRequest = null;
+
+    /**
      * Load data from /index.php?a=get
      * Can be useful, for example when it is needed to load some dynamic content to cached page
      *
@@ -38,7 +44,7 @@ class CotontiApplication
 
         if (dataToLoad.length > 0) {
             // @todo change to system controller when it will be implemented
-            let params = new URLSearchParams({a: 'get',});
+            let params = new URLSearchParams({a: 'get'});
 
             dataToLoad.forEach((item, index, array) => {
                 params.append('data[' + index + ']', item);
@@ -94,6 +100,16 @@ class CotontiApplication
                 }
             }
         });
+    }
+
+    /**
+     * @returns {CotontiPeriodicalRequest}
+     */
+    getPeriodicalRequest() {
+        if (this.#periodicalRequest === null) {
+            this.#periodicalRequest = new CotontiPeriodicalRequest();
+        }
+        return this.#periodicalRequest;
     }
 
     /**

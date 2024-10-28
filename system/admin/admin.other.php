@@ -7,6 +7,8 @@
  * @license https://github.com/Cotonti/Cotonti/blob/master/License.txt
  */
 
+use cot\dictionaries\CotontiDictionary;
+
 (defined('COT_CODE') && defined('COT_ADMIN')) or die('Wrong URL.');
 
 $t = new XTemplate(cot_tplfile('admin.other', 'core'));
@@ -101,7 +103,9 @@ if (!empty($p)) {
 		if (is_array($target)) {
 			usort($target, 'cot_admin_other_cmp');
 			foreach ($target as $pl) {
-				$ext_info = cot_get_extensionparams($pl['pl_code'], $type == COT_EXT_TYPE_MODULE);
+				$ext_info = cot_get_extensionparams(
+                    $pl['pl_code'], $type === CotontiDictionary::EXTENSION_TYPE_MODULE
+                );
 				$t->assign([
 					'ADMIN_OTHER_EXT_URL' => $type == 'plug'
                         ? cot_url('admin', 'm=other&p=' . $pl['pl_code'])
