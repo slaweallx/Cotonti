@@ -29,11 +29,10 @@ foreach (cot_getextplugins('admin.cache.disk.first') as $pl)
 
 if ($a === 'purge') {
 	if (cot_check_xg() && cot_diskcache_clearall()) {
-		cot_message('adm_purgeall_done');
-		// Empty resource consolidation cache
+		cot_message($L['adm_purgeall_done']);
         Cot::$db->delete(Cot::$db->cache, "c_name = 'cot_rc_html'");
 	} else {
-		cot_message('Error');
+		cot_message($L['Error']);
 	}
     cot_redirect(cot_url('admin', ['m' => 'cache', 's' => 'disk'], '', true));
 
@@ -45,13 +44,12 @@ if ($a === 'purge') {
         && $is_id
         && cot_diskcache_clear(\Cot::$cfg['cache_dir'] . ($is_onlyf ? '' : "/$id"), !$is_onlyf)
     ) {
-		cot_message('adm_delcacheitem');
+		cot_message($L['adm_delcacheitem']);
 		if ($id == 'static' || $is_onlyf) {
-			// Empty resource consolidation cache
             \Cot::$db->delete(\Cot::$db->cache, "c_name = 'cot_rc_html'");
 		}
 	} else {
-		cot_message('Error');
+		cot_message($L['Error']);
 	}
     cot_redirect(cot_url('admin', ['m' => 'cache', 's' => 'disk'], '', true));
 }
@@ -105,14 +103,6 @@ foreach (cot_getextplugins('admin.cache.disk.tags') as $pl)
 $t->parse('MAIN');
 $adminMain = $t->text('MAIN');
 
-/**
- * Calculates directory size
- * It's helper function for cot_diskcache_list()
- *
- * @param string $dir Directory name
- * @param bool $do_subdirs true when enter subdirectories, otherwise false
- * @return array
- */
 function cot_diskcache_calc($dir, $do_subdirs = true)
 {
 	$count = $size = 0;
@@ -137,12 +127,6 @@ function cot_diskcache_calc($dir, $do_subdirs = true)
 	return [$count, $size];
 }
 
-/**
- * Returns list of non-empty subdirectories in disk cache directory
- *
- * @global $cfg
- * @return array
- */
 function cot_diskcache_list()
 {
 	global $cfg;
@@ -150,20 +134,16 @@ function cot_diskcache_list()
 	$dir_a = array();
 
 	$a = cot_diskcache_calc($cfg['cache_dir'], false);
-	if ($a[0])
-	{
+	if ($a[0]) {
 		$dir_a[COT_DISKCACHE_ONLYFILES] = $a;
 	}
 
 	$pos = mb_strlen($cfg['cache_dir']) + 1;
 	$glob = glob("{$cfg['cache_dir']}/*", GLOB_ONLYDIR);
-	if (is_array($glob))
-	{
-		foreach ($glob as $dir)
-		{
+	if (is_array($glob)) {
+		foreach ($glob as $dir) {
 			$a = cot_diskcache_calc($dir);
-			if ($a[0])
-			{
+			if ($a[0]) {
 				$dir_a[mb_substr($dir, $pos)] = $a;
 			}
 		}
@@ -172,17 +152,10 @@ function cot_diskcache_list()
 	return $dir_a;
 }
 
-/**
- * Clears disk cache directory. Even cache is turned off
- *
- * @param string $dir Directory name
- * @param bool $do_subdirs true when enter subdirectories, otherwise false
- * @param bool $rm_dir true when remove directory, otherwise false
- * @return bool
-  */
 function cot_diskcache_clear($dir, $do_subdirs = true, $rm_dir = false)
 {
 	if (!is_dir($dir) || !is_writable($dir)) {
+		cot_message($L['Error_directory_not_writable']);
 		return false;
 	}
 
@@ -193,7 +166,9 @@ function cot_diskcache_clear($dir, $do_subdirs = true, $rm_dir = false)
                 is_file($f)
                 && !in_array($f, [Cot::$cfg['cache_dir'] . '/index.html', Cot::$cfg['cache_dir'] . '/.htaccess'])
             ) {
-				@unlink($f);
+				if (!@unlink($f)) {
+					cot_message($L['Error_deleting_file']);
+				}
 			} elseif (is_dir($f) && $do_subdirs) {
 				cot_diskcache_clear($f, true, true);
 			}
@@ -207,13 +182,13 @@ function cot_diskcache_clear($dir, $do_subdirs = true, $rm_dir = false)
 	return true;
 }
 
-/**
- * Clears disk cache completely. Even cache is turned off
- * @global $cfg
- * @return bool
- */
 function cot_diskcache_clearall()
 {
+	if (!cot_auth('admin', 'a', 'W')) {
+		cot_message($L['Error_no_permission']);
+		return false;
+	}
+
 	cot_diskcache_clear(Cot::$cfg['cache_dir'], false);
 	$glob = glob(Cot::$cfg['cache_dir'] . '/*', GLOB_ONLYDIR);
 	if (is_array($glob)) {
