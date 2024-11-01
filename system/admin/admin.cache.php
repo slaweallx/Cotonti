@@ -26,7 +26,6 @@ foreach (cot_getextplugins('admin.cache.first') as $pl)
 /* ===== */
 
 if (!$cache) {
-	// Enforce cache loading
 	require_once Cot::$cfg['system_dir'] . '/cache.php';
 	$cache = new Cache();
 	$cache->init();
@@ -35,23 +34,26 @@ if (!$cache) {
 if ($a == 'purge' && $cache) {
 	if (cot_check_xg() && $cache->clear([COT_CACHE_TYPE_DB, COT_CACHE_TYPE_MEMORY])) {
 		Cot::$db->update(Cot::$db->users, ['user_auth' => ''], "user_auth <> ''");
-		cot_message('adm_purgeall_done');
+		cot_message($L['adm_purgeall_done']);
 	} else {
-		cot_error('Error');
+		cot_error($L['Error']);
 	}
-
 } elseif ($a == 'delete') {
-	cot_check_xg();
-	$name = $db->prep(cot_import('name', 'G', 'TXT'));
-
-	$db->delete($db_cache, "c_name = '$name'") ? cot_message('adm_delcacheitem') : cot_error('Error');
+	if (cot_check_xg()) {
+		$name = $db->prep(cot_import('name', 'G', 'TXT'));
+		if ($db->delete($db_cache, "c_name = '$name'")) {
+			cot_message($L['adm_delcacheitem']);
+		} else {
+			cot_error($L['Error']);
+		}
+	} else {
+		cot_error($L['Error_invalid_request']);
+	}
 }
 
-if ($cache && $cache->mem)
-{
+if ($cache && $cache->mem) {
 	$info = $cache->get_info();
-	if ($info['available'] < 0)
-	{
+	if ($info['available'] < 0) {
 		$info['available'] = '?';
 	}
 	$t->assign(array(
@@ -70,8 +72,7 @@ $ii = 0;
 /* === Hook - Part1 : Set === */
 $extp = cot_getextplugins('admin.cache.loop');
 /* ===== */
-foreach ($sql->fetchAll() as $row)
-{
+foreach ($sql->fetchAll() as $row) {
 	$row['c_value'] = htmlspecialchars($row['c_value']);
 	$row['size'] = mb_strlen($row['c_value']);
 	$cachesize += $row['size'];
@@ -86,8 +87,7 @@ foreach ($sql->fetchAll() as $row)
 	));
 
 	/* === Hook - Part2 : Include === */
-	foreach ($extp as $pl)
-	{
+	foreach ($extp as $pl) {
 		include $pl;
 	}
 	/* ===== */
@@ -106,8 +106,7 @@ $t->assign(array(
 cot_display_messages($t);
 
 /* === Hook  === */
-foreach (cot_getextplugins('admin.cache.tags') as $pl)
-{
+foreach (cot_getextplugins('admin.cache.tags') as $pl) {
 	include $pl;
 }
 /* ===== */
